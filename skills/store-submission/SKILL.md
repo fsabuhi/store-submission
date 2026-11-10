@@ -122,7 +122,12 @@ one.
 | apple-legal | `apple/5-legal.md` | 5.x, apple-privacy-details | Consent before collection, data minimisation, account deletion, third-party AI disclosure (5.1.2(i)) |
 | play-data-safety | `google-play/data-safety.md` | play-data-safety | Trace every `data_sources` entry to where it leaves the device; prominent disclosure |
 | play-permissions | `google-play/permissions-and-apis.md` | play-restricted-permissions | Each permission in the generated manifest against the app's core purpose |
-| play-account-and-ai | `google-play/user-account.md` | play-account-deletion, play-ai-generated-content, play-policy-center | Reviewer access, in-app and web deletion, in-app reporting of AI output, target audience |
+| play-account-and-ai | `google-play/user-account.md` | play-account-deletion, play-ai-generated-content, play-age-restricted, play-policy-center | Reviewer access, in-app and web deletion, in-app reporting of AI output, target audience and age restrictions |
+
+Judge the app as it's built today. Only code that ships in the next build can
+get it rejected now. A planned feature (an unticked build step in a draftsman
+spec, or backend code no screen calls yet) gives a finding that applies "when
+that step ships": report it, but never as blocking today.
 
 Every finding needs evidence: a `file:line`, a config key, or a check that
 something required is missing (for example, a search that found no deletion flow).
@@ -132,9 +137,14 @@ someone has to check.
 
 Write each finding as JSON: `store`, `rule` (guideline number or Play
 policy), `severity` (CRITICAL, HIGH, WARN or INFO: Google's IMPORTANT maps
-to HIGH and SUGGESTION to INFO), `title`, `evidence`, `fix`, and `owner`.
-The owner is one of: `cleanup` (mechanical, see `references/cleanup.md`), `console`, a
-build step id, a decision id, or `team`.
+to HIGH and SUGGESTION to INFO), `applies` (`now`, or `when <step> ships`),
+`title`, `evidence`, `fix`, and `owner`. The owner is one of: `cleanup`
+(mechanical, see `references/cleanup.md`), `console`, a build step id, a
+decision id, or `team`. Use a build step only when that step really covers the work,
+and `team` when nothing in the spec does. Something no guideline or policy requires
+(a build profile, say) is a submission prerequisite: cite it as such, not under a
+guideline number. Also record the high-risk rules you checked and found met, as
+INFO titled "OK: …", so the report can say they were checked.
 
 While reviewing, also draft both privacy answers: the Apple App Privacy table
 and the Play Data safety table. Use the scan's `data_sources`, what the backend
@@ -151,6 +161,12 @@ can start one, or yourself, rereading the code at the evidence. Mark each one:
 - **PRUNED**: false positive. The safeguard exists, the pattern is test or
   dead code, or the rule doesn't apply. Drop it and keep a one-line reason.
 - **MANUAL**: it can't be settled statically. It goes to "Needs a person".
+
+While checking, also correct the finding itself. Check that the cited rule really
+says what the finding claims, using the live text. Check that `applies` and
+`severity` fit the app as built today. Check that the owner exists and really
+covers the work. Merge duplicates: the scan and several reviewers often report
+the same issue, so keep one entry and list what it merges.
 
 ## 6. Report
 

@@ -17,11 +17,15 @@ Each changed or new section from `report.json`, what it now says, and whether it
 
 ## Blocking
 
-Everything CRITICAL or HIGH that survived the critic, most severe first:
+Everything CRITICAL or HIGH that applies now and survived the critic, most severe first:
 
 | # | Store | Rule | Finding | Evidence | Fix | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | both | 5.1.1(v) / Account deletion | ... | `file:line` | ... | a build step / a decision id / cleanup / console / team |
+
+## Coming with later steps
+
+Findings that apply when a step ships, not today: each one's rule, what it will need, the step it applies to and its owner. Most of these are things the spec doesn't cover yet. Raise them before that step is built, not at submission.
 
 ## Cleanup done
 

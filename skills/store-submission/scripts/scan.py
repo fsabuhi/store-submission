@@ -449,6 +449,22 @@ def walk(root: Path, label: str = "") -> list[SourceFile]:
     return files
 
 
+IMPORT_STATEMENT = re.compile(
+    r"^\s*import\b[^;]*?\bfrom\s+['\"][^'\"]+['\"]|^\s*import\s+['\"][^'\"]+['\"]", re.M | re.S
+)
+
+
+def import_lines(f: SourceFile) -> set[int]:
+    """1-based line numbers inside JS/TS import statements, multi-line ones included."""
+    if f.lang not in JS:
+        return set()
+    lines: set[int] = set()
+    for m in IMPORT_STATEMENT.finditer(f.text):
+        first = f.text.count("\n", 0, m.start()) + 1
+        lines.update(range(first, first + m.group(0).count("\n") + 1))
+    return lines
+
+
 def run_rules(files: list[SourceFile]) -> list[Finding]:
     findings: list[Finding] = []
     for rule in RULES:
@@ -483,10 +499,10 @@ def run_rules(files: list[SourceFile]) -> list[Finding]:
                             doc_for(rule),
                         )
                     )
-                    if rule.once:
-                        break
-            if rule.once and hits:
-                break
+        if rule.once and hits:
+            # A project-level fact: report one hit, preferring a real use over the import that names it
+            imports = {(f.rel, n) for f in files for n in import_lines(f)}
+            hits = [next((h for h in hits if (h.file, h.line) not in imports), hits[0])]
         findings.extend(hits)
     findings.extend(console_calls(files))
     return findings
@@ -1063,10 +1079,10 @@ def check_eas(app_dir: Path) -> list[Finding]:
     return [
         Finding(
             id="eas-store-profile",
-            severity="HIGH",
+            severity="WARN",  # no guideline requires it; nothing can be submitted without it
             store="both",
             kind="cleanup",
-            guideline="2.1",
+            guideline="submission",
             title="No EAS build profile for the stores",
             detail=f"Profiles {', '.join(profiles) or '(none)'} all build for internal distribution or a dev client; "
             "eas submit needs a store build, and reviewers must get the production API and settings.",
@@ -1121,6 +1137,9 @@ def unused_assets(app_dir: Path, files: list[SourceFile], config_text: str) -> l
 
 
 # React Native and Expo calls Google's Android-first config misses; same data-type keys as policies.json
+# Google's patterns that only misfire: analytics code calls everything "track" (trackEvent, trackFirstOpen)
+SIGNAL_NOISE = {"MUSIC": ("track",)}
+
 RN_SIGNALS = {
     "DEVICE_ID": [
         "X-Device-Id",
@@ -1132,7 +1151,7 @@ RN_SIGNALS = {
     ],
     "APP_INTERACTIONS": ["posthog", "trackEvent", "/events", "logEvent"],
     "CRASH_LOGS": ["@sentry/react-native", "sentry-expo", "@bugsnag/expo", "@react-native-firebase/crashlytics"],
-    "USER_GENERATED_CONTENT": ["<TextInput", "multiline"],
+    "USER_GENERATED_CONTENT": ["multiline"],
     "PHOTOS": ["launchImageLibraryAsync", "launchCameraAsync", "expo-camera"],
     "AUDIO": ["expo-av", "expo-audio", "Audio.Recording"],
     "PRECISE_LOCATION": ["expo-location", "getCurrentPositionAsync"],
@@ -1145,7 +1164,10 @@ def data_signals(files: list[SourceFile]) -> dict:
     config = json.loads(SCANNER_CONFIG.read_text())
     signals: dict[str, dict[str, list[str]]] = {}
     categories = config["signal_categories"]
-    categories["data_sources"] = {k: v + RN_SIGNALS.get(k, []) for k, v in categories["data_sources"].items()}
+    categories["data_sources"] = {
+        k: [p for p in v if p not in SIGNAL_NOISE.get(k, ())] + RN_SIGNALS.get(k, [])
+        for k, v in categories["data_sources"].items()
+    }
     for category, groups in categories.items():
         for signal, patterns in groups.items():
             for f in files:

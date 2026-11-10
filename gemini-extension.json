@@ -1,5 +1,5 @@
 {
   "name": "store-submission",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Gets a mobile app through App Store and Google Play review: fetches the current official rules and reports what changed, scans the app and its native projects, reviews it against every guideline and policy, drafts the privacy forms and cleans up what would get it rejected."
 }
