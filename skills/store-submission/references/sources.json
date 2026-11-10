@@ -1,0 +1,93 @@
+{
+  "_comment": "Official pages fetch_guidelines.py reads on every run. `split` picks how a page is cut into sections for the change check: apple-ids by Apple's numbered guideline ids, headings by h1-h4. Add a page here, then run fetch_guidelines.py --update-baseline.",
+  "sources": [
+    {
+      "id": "apple-review-guidelines",
+      "store": "apple",
+      "title": "App Review Guidelines",
+      "url": "https://developer.apple.com/app-store/review/guidelines/",
+      "split": "apple-ids",
+      "references": ["apple/1-safety.md", "apple/2-performance.md", "apple/3-business.md", "apple/4-design.md", "apple/5-legal.md"]
+    },
+    {
+      "id": "apple-upcoming-requirements",
+      "store": "apple",
+      "title": "Upcoming Requirements (SDK minimums, deadlines)",
+      "url": "https://developer.apple.com/news/upcoming-requirements/",
+      "split": "headings"
+    },
+    {
+      "id": "apple-privacy-details",
+      "store": "apple",
+      "title": "App Privacy Details (privacy nutrition labels)",
+      "url": "https://developer.apple.com/app-store/app-privacy-details/",
+      "split": "headings"
+    },
+    {
+      "id": "apple-news",
+      "store": "apple",
+      "title": "Apple Developer News",
+      "url": "https://developer.apple.com/news/rss/news.rss",
+      "split": "rss"
+    },
+    {
+      "id": "play-policy-deadlines",
+      "store": "play",
+      "title": "Google Play Policy Deadlines",
+      "url": "https://support.google.com/googleplay/android-developer/table/12921780?hl=en",
+      "split": "headings"
+    },
+    {
+      "id": "play-target-sdk",
+      "store": "play",
+      "title": "Target API level requirements",
+      "url": "https://developer.android.com/google/play/requirements/target-sdk",
+      "split": "headings"
+    },
+    {
+      "id": "play-policy-center",
+      "store": "play",
+      "title": "Developer Program Policy Center",
+      "url": "https://play.google.com/about/developer-content-policy/",
+      "split": "headings"
+    },
+    {
+      "id": "play-prepare-for-review",
+      "store": "play",
+      "title": "Prepare your app for review (App content declarations)",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9859455?hl=en",
+      "split": "headings"
+    },
+    {
+      "id": "play-data-safety",
+      "store": "play",
+      "title": "Data safety section",
+      "url": "https://support.google.com/googleplay/android-developer/answer/10787469?hl=en",
+      "split": "headings",
+      "references": ["google-play/data-safety.md"]
+    },
+    {
+      "id": "play-account-deletion",
+      "store": "play",
+      "title": "Account deletion requirements",
+      "url": "https://support.google.com/googleplay/android-developer/answer/13327111?hl=en",
+      "split": "headings",
+      "references": ["google-play/user-account.md"]
+    },
+    {
+      "id": "play-restricted-permissions",
+      "store": "play",
+      "title": "Restricted permissions with minimum scope alternatives",
+      "url": "https://support.google.com/googleplay/android-developer/answer/14115180?hl=en",
+      "split": "headings",
+      "references": ["google-play/permissions-and-apis.md"]
+    },
+    {
+      "id": "play-ai-generated-content",
+      "store": "play",
+      "title": "AI-Generated Content policy",
+      "url": "https://support.google.com/googleplay/android-developer/answer/13985936?hl=en",
+      "split": "headings"
+    }
+  ]
+}

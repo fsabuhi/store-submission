@@ -1,0 +1,26 @@
+{
+  "name": "store-submission",
+  "description": "App Store and Google Play submission checks against the current official rules.",
+  "owner": {
+    "name": "fsabuhi",
+    "url": "https://github.com/fsabuhi"
+  },
+  "plugins": [
+    {
+      "name": "store-submission",
+      "description": "Gets a mobile app through App Store and Google Play review: fetches the current official rules and reports what changed, scans the app and its native projects, reviews it against every guideline and policy, drafts the privacy forms and cleans up what would get it rejected.",
+      "source": "./",
+      "category": "productivity",
+      "tags": [
+        "app-store",
+        "google-play",
+        "app-review",
+        "expo",
+        "react-native",
+        "privacy",
+        "mobile"
+      ],
+      "skills": "skills/"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "store-submission",
+  "interface": {
+    "displayName": "Store Submission"
+  },
+  "plugins": [
+    {
+      "name": "store-submission",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/fsabuhi/store-submission.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
