@@ -83,6 +83,13 @@
       "references": ["google-play/permissions-and-apis.md"]
     },
     {
+      "id": "play-age-restricted",
+      "store": "play",
+      "title": "Age-Restricted Content and Functionality policy",
+      "url": "https://support.google.com/googleplay/android-developer/answer/16302250?hl=en",
+      "split": "headings"
+    },
+    {
       "id": "play-ai-generated-content",
       "store": "play",
       "title": "AI-Generated Content policy",

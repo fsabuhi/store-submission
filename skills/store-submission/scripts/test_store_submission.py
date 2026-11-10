@@ -209,13 +209,39 @@ class ScanTest(unittest.TestCase):
         self.assertEqual(self.ids(result).count("http-url"), 1)
         self.assertIn("debuggable", self.ids(result))
 
+    def test_a_project_level_finding_points_at_the_use_not_the_import(self):
+        result = self.scan(
+            {
+                "app/src/auth.ts": """
+            import {
+              getAuth,
+              linkWithCredential,
+            } from "firebase/auth";
+
+            export async function save(user, cred) {
+              await linkWithCredential(user, cred);
+            }
+        """
+            }
+        )
+        finding = next(f for f in result["findings"] if f["id"] == "account-without-deletion")
+        self.assertEqual(finding["line"], 8)  # the call, not line 4 inside the import
+
+    def test_analytics_track_calls_are_not_music(self):
+        result = self.scan({"app/src/events.ts": "export function trackFirstOpen() { track('first_open'); }\n"})
+        self.assertNotIn("MUSIC", result["data_safety"]["data_sources"])
+
     def test_dev_guarded_console_calls_are_fine(self):
         result = self.scan({"app/src/a.ts": "__DEV__ && console.warn(error);\nif (__DEV__) console.log(x);\n"})
         self.assertNotIn("console-call", self.ids(result))
 
     def test_eas_needs_a_store_profile(self):
         internal = {"build": {"staging": {"distribution": "internal"}, "dev": {"developmentClient": True}}}
-        self.assertIn("eas-store-profile", self.ids(self.scan({"app/eas.json": json.dumps(internal)})))
+        result = self.scan({"app/eas.json": json.dumps(internal)})
+        profile = next(f for f in result["findings"] if f["id"] == "eas-store-profile")
+        self.assertEqual(
+            (profile["severity"], profile["guideline"]), ("WARN", "submission")
+        )  # no guideline requires it
         internal["build"]["production"] = {"autoIncrement": True}
         self.assertNotIn("eas-store-profile", self.ids(self.scan({"app/eas.json": json.dumps(internal)})))
 
@@ -236,6 +262,19 @@ HELP_PAGE = """<html><body><h1>Policy Deadlines</h1><h2>Upcoming</h2><table>
 
 
 class FetchTest(unittest.TestCase):
+    def test_sources_are_unique_https_and_in_the_baseline(self):
+        sources = json.loads((HERE.parent / "references" / "sources.json").read_text())["sources"]
+        baseline = json.loads((HERE.parent / "references" / "baseline.json").read_text())["sections"]
+        ids = [s["id"] for s in sources]
+        self.assertEqual(len(ids), len(set(ids)))
+        for s in sources:
+            self.assertTrue(s["url"].startswith("https://"), s["id"])
+            self.assertTrue(
+                s["id"] in baseline, f"{s['id']} has no baseline: run fetch_guidelines.py --update-baseline"
+            )
+            for ref in s.get("references", []):
+                self.assertTrue((HERE.parent / "references" / ref).is_file(), ref)
+
     def test_apple_page_splits_by_guideline_id_and_drops_chrome(self):
         text, sections = fetch.html_sections(APPLE_PAGE, "apple-ids")
         self.assertEqual(list(sections), ["(intro)", "1.1", "1.1.1"])
